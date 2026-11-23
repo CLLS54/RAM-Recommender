@@ -1,5 +1,8 @@
 # RAM-RECOMMENDER (AMD + Intel, DDR3/4/5)
 
+[![Invitame un cafe en Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/clls54)
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Inv%C3%ADtame%20un%20caf%C3%A9-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/clls54)
+
 Recomendador de configuración de memoria DRAM **multiplataforma** + **base de datos de fabricantes/dies**.
 
 Compatible con:
@@ -278,3 +281,14 @@ Genera un JSON con frecuencia, timings primarios, subtimings y voltajes, listo p
 ### Nota sobre el benchmark
 Un benchmark de memoria **sí** se puede integrar (y ya está: `bench.py` + `bench/membench.cs`). Mide latencia en ns y ancho de banda en GB/s.
 **Pero** recuerda: aunque mida "mejor config", **no puede aplicarla**; el resultado siempre se aplica en BIOS.
+
+
+## Apoyar el proyecto
+
+Si esta herramienta te resulta util, puedes invitarme un cafe. El dinero se
+destina a mantener las pruebas, el hardware de verificacion y las horas de
+desarrollo.
+
+[![Invitame un cafe en Ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/clls54)
+
+[![Ko-fi](https://img.shields.io/badge/Ko--fi-Inv%C3%ADtame%20un%20caf%C3%A9-FF5E5B?logo=ko-fi&logoColor=white)](https://ko-fi.com/clls54)
