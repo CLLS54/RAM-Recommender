@@ -1,0 +1,572 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>RAM Recommender v3.3 — Manual</title>
+<style>
+  :root{
+    color-scheme: dark;
+    --bg:#0b0f14;
+    --panel:#141a22;
+    --panel2:#0f151c;
+    --panel3:#111821;
+    --text:#e6edf3;
+    --muted:#9aa7b4;
+    --accent:#58a6ff;
+    --accent2:#7c5cff;
+    --border:#26313f;
+    --code:#070b10;
+    --ok:#3fb950;
+    --warn:#d29922;
+    --bad:#f85149;
+    --radius:14px;
+    --shadow:0 10px 30px rgba(0,0,0,.35);
+  }
+  *{box-sizing:border-box}
+  html{scroll-behavior:smooth}
+  body{
+    margin:0;background:var(--bg);color:var(--text);
+    font:16px/1.65 "Segoe UI",system-ui,-apple-system,Roboto,Helvetica,Arial,sans-serif;
+    -webkit-font-smoothing:antialiased;
+  }
+  a{color:var(--accent);text-decoration:none}
+  a:hover{text-decoration:underline}
+  code{
+    background:var(--code);border:1px solid var(--border);border-radius:6px;
+    padding:1px 6px;font-family:"Cascadia Code",Consolas,"Courier New",monospace;
+    font-size:13.5px;color:#c9d7e6;
+  }
+  pre{
+    background:var(--code);border:1px solid var(--border);border-radius:10px;
+    padding:16px 18px;overflow-x:auto;margin:14px 0;
+    font-family:"Cascadia Code",Consolas,"Courier New",monospace;font-size:13.5px;
+    line-height:1.6;color:#cbd6e2;
+  }
+  pre .c{color:#6b7b8c}
+  pre .g{color:var(--ok)}
+  pre .y{color:var(--warn)}
+  pre .r{color:var(--bad)}
+  pre .b{color:var(--accent)}
+  pre .k{color:#c9d7e6}
+
+  /* ---------- Layout con barra lateral ---------- */
+  .layout{display:grid;grid-template-columns:280px 1fr;min-height:100vh}
+  aside{
+    position:sticky;top:0;align-self:start;height:100vh;overflow-y:auto;
+    background:var(--panel2);border-right:1px solid var(--border);
+    padding:22px 16px 40px;
+  }
+  aside .brand{display:flex;align-items:center;gap:10px;margin:0 6px 6px}
+  aside .logo{
+    width:34px;height:34px;border-radius:9px;flex:0 0 34px;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));
+    display:grid;place-items:center;font-weight:700;color:#06121f;font-size:15px
+  }
+  aside .brand b{font-size:15.5px}
+  aside .brand span{display:block;font-size:12px;color:var(--muted)}
+  aside .verpill{
+    display:inline-block;margin:8px 6px 14px;font-size:12px;color:var(--accent);
+    border:1px solid var(--border);border-radius:999px;padding:2px 10px;background:var(--panel)
+  }
+  nav.side a{
+    display:flex;gap:10px;align-items:center;padding:8px 10px;border-radius:9px;
+    color:var(--muted);font-size:14.5px;margin:2px 0;border:1px solid transparent
+  }
+  nav.side a .num{
+    width:22px;height:22px;flex:0 0 22px;border-radius:6px;display:grid;place-items:center;
+    background:var(--panel);border:1px solid var(--border);font-size:12px;color:var(--muted)
+  }
+  nav.side a:hover{background:var(--panel3);color:var(--text);text-decoration:none}
+  nav.side a.active{background:var(--panel);color:var(--text);border-color:var(--border)}
+  nav.side a.active .num{background:var(--accent);color:#06121f;border-color:var(--accent)}
+
+  main{padding:34px 40px 90px;max-width:1000px}
+
+  /* ---------- Hero ---------- */
+  .hero{
+    background:
+      radial-gradient(1100px 380px at 88% -30%, rgba(88,166,255,.16), transparent 60%),
+      radial-gradient(700px 300px at 0% 0%, rgba(124,92,255,.12), transparent 55%),
+      var(--panel);
+    border:1px solid var(--border);border-radius:var(--radius);
+    padding:34px 34px 30px;margin-bottom:26px;box-shadow:var(--shadow)
+  }
+  .hero h1{margin:0 0 8px;font-size:32px;letter-spacing:.2px}
+  .hero h1 .ver{color:var(--accent)}
+  .hero p.sub{color:var(--muted);margin:0;font-size:15.5px;max-width:70ch}
+  .badges{margin-top:18px;display:flex;flex-wrap:wrap;gap:9px}
+  .badge{
+    border:1px solid var(--border);background:var(--panel2);border-radius:999px;
+    padding:5px 13px;font-size:12.5px;color:var(--muted);display:inline-flex;gap:7px;align-items:center
+  }
+  .badge .dot{width:8px;height:8px;border-radius:50%;background:var(--ok)}
+
+  /* ---------- Tarjetas de inicio rápido ---------- */
+  .quick{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin:26px 0 30px}
+  @media (max-width:900px){.quick{grid-template-columns:1fr}}
+  .qcard{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:18px 18px 16px;transition:border-color .15s, transform .15s
+  }
+  .qcard:hover{border-color:var(--accent);transform:translateY(-2px)}
+  .qcard .ico{
+    width:38px;height:38px;border-radius:10px;display:grid;place-items:center;
+    background:var(--panel2);border:1px solid var(--border);font-size:19px;margin-bottom:10px
+  }
+  .qcard h3{margin:0 0 4px;font-size:15.5px}
+  .qcard p{margin:0;color:var(--muted);font-size:13.5px}
+
+  /* ---------- Secciones ---------- */
+  section{
+    background:var(--panel);border:1px solid var(--border);border-radius:var(--radius);
+    padding:24px 26px;margin:0 0 22px;scroll-margin-top:20px
+  }
+  section h2{
+    margin:0 0 16px;font-size:21px;display:flex;align-items:center;gap:12px;
+    border-bottom:1px solid var(--border);padding-bottom:12px
+  }
+  section h2 .n{
+    width:30px;height:30px;flex:0 0 30px;border-radius:9px;display:grid;place-items:center;
+    background:linear-gradient(135deg,var(--accent),var(--accent2));color:#06121f;
+    font-size:14px;font-weight:700
+  }
+  h3{font-size:16px;margin:22px 0 8px}
+  p{margin:10px 0}
+  ul,ol{margin:10px 0;padding-left:22px}
+  li{margin:6px 0}
+
+  table{width:100%;border-collapse:separate;border-spacing:0;margin:16px 0;font-size:14.5px;
+    border:1px solid var(--border);border-radius:12px;overflow:hidden}
+  th,td{border-bottom:1px solid var(--border);padding:10px 13px;text-align:left;vertical-align:top}
+  th{background:var(--panel2);color:var(--muted);font-weight:600;font-size:12.5px;
+     text-transform:uppercase;letter-spacing:.06em}
+  tbody tr:nth-child(even){background:var(--panel3)}
+  tbody tr:last-child td{border-bottom:none}
+
+  .note,.warn,.ok,.bad,.tip{
+    border-radius:12px;padding:13px 16px;margin:16px 0;border:1px solid var(--border);
+    background:var(--panel2);display:flex;gap:12px;align-items:flex-start
+  }
+  .note{border-left:4px solid var(--accent)}
+  .warn{border-left:4px solid var(--warn)}
+  .ok{border-left:4px solid var(--ok)}
+  .bad{border-left:4px solid var(--bad)}
+  .tip{border-left:4px solid var(--accent2)}
+  .note .em,.warn .em,.ok .em,.bad .em,.tip .em{font-size:18px;line-height:1.3}
+  .note b,.warn b,.ok b,.bad b,.tip b{color:var(--text)}
+
+  /* ---------- Pasos ---------- */
+  .steps{counter-reset:step;margin:18px 0;padding:0;list-style:none}
+  .steps li{
+    position:relative;padding:0 0 20px 46px;margin:0;border-left:2px solid var(--border);
+    margin-left:14px
+  }
+  .steps li:last-child{border-left-color:transparent;padding-bottom:0}
+  .steps li::before{
+    counter-increment:step;content:counter(step);position:absolute;left:-15px;top:-2px;
+    width:30px;height:30px;border-radius:50%;display:grid;place-items:center;
+    background:var(--panel);border:2px solid var(--accent);color:var(--accent);
+    font-weight:700;font-size:13.5px
+  }
+  .steps li b{display:block;margin-bottom:2px}
+  .steps li span{color:var(--muted);font-size:14px}
+
+  /* ---------- Bloques de copiar ---------- */
+  .codeblock{position:relative;margin:14px 0}
+  .codeblock pre{margin:0;padding-top:44px}
+  .codeblock .bar{
+    position:absolute;top:0;left:0;right:0;height:38px;display:flex;align-items:center;
+    justify-content:space-between;padding:0 12px 0 16px;background:var(--panel3);
+    border:1px solid var(--border);border-bottom:none;border-radius:10px 10px 0 0
+  }
+  .codeblock .bar .lbl{font-size:12px;color:var(--muted);text-transform:uppercase;letter-spacing:.08em}
+  .codeblock .copy{
+    cursor:pointer;font-size:12px;color:var(--muted);background:var(--panel);
+    border:1px solid var(--border);border-radius:7px;padding:4px 10px
+  }
+  .codeblock .copy:hover{color:var(--text);border-color:var(--accent)}
+  .codeblock pre{border-radius:0 0 10px 10px;margin-top:38px}
+
+  /* ---------- Diagrama de flujo ---------- */
+  .flow{display:flex;flex-wrap:wrap;gap:10px;align-items:stretch;margin:18px 0}
+  .flow .fstep{
+    flex:1 1 150px;background:var(--panel2);border:1px solid var(--border);border-radius:12px;
+    padding:14px;min-width:140px
+  }
+  .flow .fstep .fh{font-size:12px;color:var(--accent);letter-spacing:.06em;text-transform:uppercase;margin-bottom:6px}
+  .flow .fstep b{display:block;font-size:14px}
+  .flow .fstep span{color:var(--muted);font-size:12.5px}
+  .flow .arrow{align-self:center;color:var(--muted);font-size:20px;flex:0 0 auto}
+
+  @media (max-width:1000px){
+    .layout{grid-template-columns:1fr}
+    aside{position:relative;height:auto;border-right:none;border-bottom:1px solid var(--border)}
+    nav.side{display:flex;flex-wrap:wrap;gap:6px}
+    nav.side a{border:1px solid var(--border);background:var(--panel)}
+    main{padding:24px 20px 70px}
+  }
+
+  @media print{
+    :root{
+      color-scheme: light;
+      --bg:#ffffff;--panel:#ffffff;--panel2:#f6f6f6;--panel3:#f0f0f0;--text:#000000;
+      --muted:#333333;--accent:#0645ad;--accent2:#5a3ec8;--border:#bbbbbb;--code:#f2f2f2;
+    }
+    body{background:#fff;color:#000}
+    aside{display:none}
+    .layout{grid-template-columns:1fr}
+    .hero{background:#fff;box-shadow:none}
+    section,.qcard,.fstep{break-inside:avoid;border-color:#bbb}
+    pre,code{background:#f2f2f2;color:#000}
+    pre .c,pre .g,pre .y,pre .r,pre .b,pre .k{color:#000}
+    a{color:#000;text-decoration:underline}
+    .codeblock .copy{display:none}
+  }
+</style>
+</head>
+<body>
+<div class="layout">
+
+  <!-- ============ BARRA LATERAL ============ -->
+  <aside>
+    <div class="brand">
+      <div class="logo">RR</div>
+      <div><b>RAM Recommender</b><span>Manual de uso</span></div>
+    </div>
+    <span class="verpill">versión 3.3</span>
+    <nav class="side" id="sidenav">
+      <a href="#inicio"><span class="num">★</span> Inicio rápido</a>
+      <a href="#que-es"><span class="num">1</span> Qué es</a>
+      <a href="#como-se-usa"><span class="num">2</span> Cómo se usa</a>
+      <a href="#comandos"><span class="num">3</span> Comandos</a>
+      <a href="#fuentes"><span class="num">4</span> Fuentes de datos</a>
+      <a href="#cpuz"><span class="num">5</span> Timings con CPU-Z</a>
+      <a href="#perfil"><span class="num">6</span> Perfil actual</a>
+      <a href="#snapshot"><span class="num">7</span> Snapshots</a>
+      <a href="#ejemplo"><span class="num">8</span> Ejemplo real</a>
+      <a href="#flujo"><span class="num">9</span> Flujo de trabajo</a>
+      <a href="#pruebas"><span class="num">10</span> Pruebas</a>
+      <a href="#limites"><span class="num">11</span> Límites</a>
+    </nav>
+  </aside>
+
+  <!-- ============ CONTENIDO ============ -->
+  <main>
+
+    <div class="hero">
+      <h1>RAM Recommender <span class="ver">v3.3</span></h1>
+      <p class="sub">Diagnóstico y recomendación de memoria RAM. Detecta el hardware real de <b>tu</b> equipo y te dice qué frecuencia, timings y voltajes puedes pedirle — para aplicarlos tú en la BIOS/UEFI.</p>
+      <div class="badges">
+        <span class="badge"><span class="dot"></span> Solo recomienda, no aplica cambios</span>
+        <span class="badge"><span class="dot"></span> No requiere Python</span>
+        <span class="badge"><span class="dot"></span> Timings reales vía CPU-Z</span>
+        <span class="badge"><span class="dot"></span> Windows · macOS · Linux</span>
+        <span class="badge"><span class="dot"></span> 62 pruebas / 0 fallos</span>
+      </div>
+    </div>
+
+    <!-- ---------- INICIO RÁPIDO ---------- -->
+    <section id="inicio">
+      <h2><span class="n">★</span>Inicio rápido</h2>
+      <p>Tres formas de trabajar con el programa. Empieza por la primera.</p>
+      <div class="quick">
+        <div class="qcard">
+          <div class="ico">🖥️</div>
+          <h3>Solo quiero recomendaciones</h3>
+          <p>Doble clic en <code>RAMRecommender.exe</code>. Detecta el equipo solo y muestra el diagnóstico.</p>
+        </div>
+        <div class="qcard">
+          <div class="ico">⌨️</div>
+          <h3>Prefiero la consola</h3>
+          <p><code>RAMRecommender-cli.exe detect</code> imprime el perfil y la recomendación completa.</p>
+        </div>
+        <div class="qcard">
+          <div class="ico">🧩</div>
+          <h3>Quiero comparar aplicado vs. motor</h3>
+          <p>Instala CPU-Z y ejecuta <code>RAMRecommender-cli.exe timings</code>.</p>
+        </div>
+      </div>
+      <div class="ok">
+        <span class="em">✅</span>
+        <div><b>Nada de esto escribe en el hardware.</b> El programa diagnostica, compara y exporta un preset JSON. Los cambios de memoria se hacen siempre a mano en la BIOS/UEFI.</div>
+      </div>
+    </section>
+
+    <!-- ---------- 1. QUÉ ES ---------- -->
+    <section id="que-es">
+      <h2><span class="n">1</span>Qué es</h2>
+      <p>Lee la memoria RAM instalada en <b>este</b> equipo y recomienda qué frecuencia, timings y voltajes puedes pedirle. <b>No aplica nada</b>: los cambios se hacen en la BIOS/UEFI y requieren reiniciar.</p>
+      <div class="note">
+        <span class="em">🛡️</span>
+        <div><b>Diseño seguro.</b> Nunca escribe timings, ni toca el registro, ni modifica el pagefile. Solo diagnostica, compara y exporta un preset para que lo introduzcas a mano.</div>
+      </div>
+      <p>Antes solo funcionaba en el equipo donde se diseñó: en otros mostraba <code>48 GB</code>, una plataforma equivocada y <code>3800 MT/s</code> con un tope real de <code>2933</code>. Eso ya está corregido.</p>
+    </section>
+
+    <!-- ---------- 2. CÓMO SE USA ---------- -->
+    <section id="como-se-usa">
+      <h2><span class="n">2</span>Cómo se usa</h2>
+      <table>
+        <thead><tr><th>Archivo</th><th>Para qué</th></tr></thead>
+        <tbody>
+          <tr><td><code>RAMRecommender.exe</code></td><td>Ventana gráfica. Al abrir, detecta el equipo solo. Botón <b>Guardar preset JSON</b> para llevar los valores a la BIOS.</td></tr>
+          <tr><td><code>RAMRecommender-cli.exe</code></td><td>Consola, para scripts. Ver <a href="#comandos">comandos</a>.</td></tr>
+        </tbody>
+      </table>
+      <div class="tip">
+        <span class="em">💡</span>
+        <div>Los <code>.exe</code> son <b>autocontenidos</b>: llevan dentro la base de datos de dies y el benchmark. Se pueden copiar solos, en un pendrive, a cualquier carpeta de cualquier Windows 10/11.</div>
+      </div>
+      <div class="warn">
+        <span class="em">🍎</span>
+        <div>El <code>.exe</code> es de Windows. En macOS o Linux se ejecuta desde la fuente: <code>python3 src/app_gui.py</code> (requiere Python 3 + tkinter).</div>
+      </div>
+    </section>
+
+    <!-- ---------- 3. COMANDOS ---------- -->
+    <section id="comandos">
+      <h2><span class="n">3</span>Comandos de consola</h2>
+      <div class="codeblock">
+        <div class="bar"><span class="lbl">PowerShell / CMD</span><button class="copy">Copiar</button></div>
+        <pre><span class="c"># Perfil actual del hardware (frecuencia, módulos, ajuste posible)</span>
+RAMRecommender-cli.exe profile
+RAMRecommender-cli.exe profile --json
+
+<span class="c"># Timings ACTIVOS reales leídos con CPU-Z</span>
+RAMRecommender-cli.exe timings
+RAMRecommender-cli.exe timings --json
+
+<span class="c"># Lectura completa + recomendación</span>
+RAMRecommender-cli.exe detect
+RAMRecommender-cli.exe detect --json
+
+<span class="c"># Diagnóstico del entorno: qué se puede verificar y qué no</span>
+RAMRecommender-cli.exe doctor
+
+<span class="c"># Benchmark de latencia y ancho de banda</span>
+RAMRecommender-cli.exe bench --label stock --size 512</pre>
+      </div>
+      <h3>La acción <code>timings</code> es nueva en la v3.3</h3>
+      <p>Devuelve los timings activos leídos por CPU-Z y comprueba si el informe corresponde a este equipo. Con <code>--json</code> obtienes todo el detalle (timings, módulos, SPD y la comprobación).</p>
+    </section>
+
+    <!-- ---------- 4. FUENTES ---------- -->
+    <section id="fuentes">
+      <h2><span class="n">4</span>Fuentes de datos por sistema</h2>
+      <p>El hardware se lee de la fuente nativa de cada sistema, sin instalar nada:</p>
+      <table>
+        <thead><tr><th>Sistema</th><th>Fuente</th><th>Qué obtiene</th></tr></thead>
+        <tbody>
+          <tr><td><b>Windows</b></td><td>WMI / CIM (SMBIOS)</td><td>CPU, placa, BIOS, módulos, part numbers, capacidad, frecuencia nominal y configurada, tipo DDR, canales.</td></tr>
+          <tr><td><b>macOS</b></td><td><code>system_profiler -json</code></td><td>CPU/modelo, memoria unificada o módulos, capacidad, tipo, frecuencia.</td></tr>
+          <tr><td><b>Linux</b></td><td>sysfs + <code>/proc/meminfo</code></td><td>Capacidad total y, con <code>dmidecode</code> y permisos, módulos y part numbers.</td></tr>
+        </tbody>
+      </table>
+      <div class="warn">
+        <span class="em">🍎</span>
+        <div><b>macOS / Apple Silicon:</b> la memoria es unificada/soldada — se informa como <b>no ajustable</b> y no se recomiendan timings que no existen. En Mac Intel se detectan las ranuras, pero macOS no expone ajuste.</div>
+      </div>
+    </section>
+
+    <!-- ---------- 5. CPU-Z ---------- -->
+    <section id="cpuz">
+      <h2><span class="n">5</span>Timings reales con CPU-Z</h2>
+      <p>SMBIOS <b>no</b> publica los timings activos (CL / tRCD / tRP / tRAS). CPU-Z sí. Si CPU-Z está instalado, el programa lo ejecuta en modo fantasma (<code>cpuz.exe -txt=report</code>) y lee del informe:</p>
+      <ul>
+        <li>Frecuencia real de DRAM (CPU-Z da MHz; en DDR el equivalente en MT/s es el doble).</li>
+        <li>Timings primarios activos, <code>tRFC</code> y <code>Command Rate</code>.</li>
+        <li>SPD por módulo: fabricante, part number, capacidad y ancho de banda nominal.</li>
+      </ul>
+      <div class="codeblock">
+        <div class="bar"><span class="lbl">Salida esperada</span><button class="copy">Copiar</button></div>
+        <pre><span class="c">Perfil actual : 2926 MT/s  21-21-21-47  tRFC 514  CR 2T   (leido con CPU-Z)</span>
+
+COMPARATIVA CON EL PERFIL APLICADO
+  actual : 2926 MT/s  21-21-21-47  tRFC 514  <span class="b">1.20 V</span>
+  motor  : 2933 MT/s  16-18-18-36  tRFC 513  <span class="y">1.35 V</span></pre>
+      </div>
+      <div class="note">
+        <span class="em">ℹ️</span>
+        <div><b>Es opcional.</b> Sin CPU-Z, el programa sigue funcionando: muestra el <b>Perfil actual</b> con lo que publica el hardware y avisa de que los timings activos no son legibles. <b>Nunca se inventan valores.</b></div>
+      </div>
+      <div class="ok">
+        <span class="em">✅</span>
+        <div>La validación es la misma que con ZenTimings: si el informe no corresponde a este equipo, se descarta y se explica por qué.</div>
+      </div>
+      <p>CPU-Z se descarga de <a href="https://www.cpuid.com/softwares/cpu-z.html">cpuid.com/softwares/cpu-z.html</a>. También puedes copiar <code>cpuz.exe</code> en <code>tools\cpuz\</code> junto al programa.</p>
+    </section>
+
+    <!-- ---------- 6. PERFIL ---------- -->
+    <section id="perfil">
+      <h2><span class="n">6</span>Perfil actual y multiplataforma</h2>
+      <p>El campo <b>Perfil actual</b> ya no dice <code>desconocido</code>: se calcula del hardware real.</p>
+      <table>
+        <thead><tr><th>Dato</th><th>Ejemplo real</th></tr></thead>
+        <tbody>
+          <tr><td>Frecuencia configurada vs. SPD</td><td><code>2933 MT/s (SPD 3200 MT/s)</code></td></tr>
+          <tr><td>Módulos y capacidad</td><td>2 × SK hynix <code>HMA81GS6DJR8N-XN</code> (8 GB) = 16 GB</td></tr>
+          <tr><td>Generación y canales</td><td>DDR4 · canales A/B</td></tr>
+          <tr><td>Kit</td><td>homogéneo (no mixto)</td></tr>
+          <tr><td>Ajuste</td><td>posible en BIOS/UEFI (en OEM puede no exponerse)</td></tr>
+        </tbody>
+      </table>
+      <p>Si la memoria corre por debajo de su SPD, se avisa. Sin CPU-Z, los timings activos se declaran <b>no legibles</b>. La recomendación de timings solo aparece donde existe ajuste posible.</p>
+    </section>
+
+    <!-- ---------- 7. SNAPSHOTS ---------- -->
+    <section id="snapshot">
+      <h2><span class="n">7</span>Snapshots e informes guardados</h2>
+      <p>El programa acepta dos formatos además de la lectura en vivo:</p>
+      <table>
+        <thead><tr><th>Formato</th><th>Cómo se carga</th></tr></thead>
+        <tbody>
+          <tr><td><b>Informe de CPU-Z</b> (<code>*.txt</code>)</td><td>Botón <b>Abrir CPU-Z o snapshot...</b></td></tr>
+          <tr><td><b>Snapshot de ZenTimings</b> (<code>ZenTimings_snapshot_*.json</code>)</td><td>Automático si lo dejas junto al <code>.exe</code>, o manual con el mismo botón.</td></tr>
+        </tbody>
+      </table>
+      <p>La comprobación compara número de módulos, GB totales (±5 %), generación DDR y part numbers. Si no coincide, se <b>ignora</b> y la cabecera explica por qué:</p>
+      <div class="codeblock">
+        <div class="bar"><span class="lbl">Ejemplo de rechazo</span><button class="copy">Copiar</button></div>
+        <pre><span class="y">Fuente: WMI - snapshot ZenTimings_snapshot_1234.json IGNORADO
+        (el snapshot describe 4 modulo(s) y este equipo tiene 2)</span></pre>
+      </div>
+      <p>Si insistes con <b>Abrir CPU-Z o snapshot...</b>, pide confirmación explícita y avisa de que el diagnóstico describirá <b>otro</b> equipo.</p>
+    </section>
+
+    <!-- ---------- 8. EJEMPLO REAL ---------- -->
+    <section id="ejemplo">
+      <h2><span class="n">8</span>Ejemplo real de salida</h2>
+      <p>En un HP ProDesk 400 G6 (i7-10700, 2×8 GB SK hynix DJR, DDR4):</p>
+      <div class="codeblock">
+        <div class="bar"><span class="lbl">RAMRecommender-cli.exe detect</span><button class="copy">Copiar</button></div>
+        <pre><span class="k"> Equipo        :</span> HP ProDesk 400 G6 Desktop Mini PC
+<span class="k"> Placa base    :</span> HP 871A
+<span class="k"> BIOS          :</span> HP S23 Ver. 02.23.00  (2025-07-06)
+<span class="k"> CPU           :</span> Intel(R) Core(TM) i7-10700 CPU @ 2.90GHz (8C/16T)
+<span class="b"> Plataforma    :</span> LGA1200  (DDR4)
+<span class="k"> Memoria total :</span> 16.0 GB en 2 de 2 ranuras
+<span class="g"> Perfil actual :</span> 2933 MT/s (SPD 3200 MT/s) - 16 GB - 2 modulos
+   Modulos: SK hynix HMA81GS6DJR8N-XN (8 GB), SK hynix HMA81GS6DJR8N-XN (8 GB)
+   Generacion: DDR4
+   Nominal del SPD: 3200 MT/s
+   Configurada ahora: 2933 MT/s (corre por debajo del SPD)
+   Kit homogeneo: si
+   Ajuste       : posible en BIOS/UEFI (aqui solo se recomienda)
+
+<span class="g"> Perfil aplicado :</span> 2926 MT/s  21-21-21-47  tRFC 514  CR 2T   (leido con CPU-Z)</pre>
+      </div>
+      <h3>Recomendación que produce el motor</h3>
+      <div class="codeblock">
+        <div class="bar"><span class="lbl">Sección RECOMENDACION</span><button class="copy">Copiar</button></div>
+        <pre><span class="b">RECOMENDACION DE MEMORIA  |  lga1200 / DDR4</span>
+ Die: 8Gbit DJR (D-die) (tier C)
+ CPU           : i7-10700  (gen comet)
+ Objetivo      : balanced  ->  Punto dulce de la plataforma
+ Frecuencia    : DDR4 3200 MT/s
+ Timings prim. : <span class="g">16-18-18-36</span>  (tCL-tRCD-tRP-tRAS)
+ tRFC          : 560 clocks (~350.0 ns)
+ Modo          : Gear 1 (1:1 IMC:DRAM)
+ VDIMM         : 1.35 V</pre>
+      </div>
+    </section>
+
+    <!-- ---------- 9. FLUJO ---------- -->
+    <section id="flujo">
+      <h2><span class="n">9</span>Flujo de trabajo recomendado</h2>
+      <div class="flow">
+        <div class="fstep"><div class="fh">Paso 1</div><b>Diagnóstico</b><span>Abre el programa y revisa perfil actual vs. aplicado.</span></div>
+        <div class="arrow">→</div>
+        <div class="fstep"><div class="fh">Paso 2</div><b>Baseline</b><span>Guarda <code>bench --label stock</code>.</span></div>
+        <div class="arrow">→</div>
+        <div class="fstep"><div class="fh">Paso 3</div><b>Aplicar en BIOS</b><span>Introduce el preset a mano y reinicia.</span></div>
+        <div class="arrow">→</div>
+        <div class="fstep"><div class="fh">Paso 4</div><b>Validar</b><span>MemTest86 ≥ 400 % y 0 WHEA en 24 h.</span></div>
+        <div class="arrow">→</div>
+        <div class="fstep"><div class="fh">Paso 5</div><b>Comparar</b><span>Mide <code>bench --label tuned</code> y compara.</span></div>
+      </div>
+      <div class="warn">
+        <span class="em">⚠️</span>
+        <div>Si MemTest falla o hay errores WHEA, vuelve a los valores anteriores. En equipos OEM (HP/Dell/Lenovo) es posible que la BIOS no exponga estos ajustes.</div>
+      </div>
+    </section>
+
+    <!-- ---------- 10. PRUEBAS ---------- -->
+    <section id="pruebas">
+      <h2><span class="n">10</span>Pruebas y recompilación</h2>
+      <table>
+        <thead><tr><th>Comando</th><th>Cubre</th><th>Resultado</th></tr></thead>
+        <tbody>
+          <tr><td><code>python tests\test_hwmatch.py</code></td><td>Plataforma, VDIMM y rechazo de snapshots ajenos</td><td><b>20/20</b></td></tr>
+          <tr><td><code>python tests\test_profile.py</code></td><td>Perfil actual (Intel, kit mixto, Apple Silicon, Mac Intel, Linux)</td><td><b>11/11</b></td></tr>
+          <tr><td><code>python tests\test_cpuz.py</code></td><td>Parser del informe de CPU-Z</td><td><b>8/8</b></td></tr>
+          <tr><td><code>python tests\run_tests.py</code></td><td>Suite completa</td><td><b>62 pasan, 0 fallan</b></td></tr>
+        </tbody>
+      </table>
+      <p>Las pruebas que dependen de datos del equipo de diseño se marcan como <b>omitidas</b> fuera de esa máquina, no como fallo.</p>
+      <h3>Recompilar</h3>
+      <div class="codeblock">
+        <div class="bar"><span class="lbl">PowerShell</span><button class="copy">Copiar</button></div>
+        <pre>.\build_exe.ps1
+<span class="c"># equivale a:  python -m PyInstaller RAMRecommender.spec --noconfirm --clean
+# y copia los .exe de dist\ a la raiz</span></pre>
+      </div>
+    </section>
+
+    <!-- ---------- 11. LÍMITES ---------- -->
+    <section id="limites">
+      <h2><span class="n">11</span>Límites honestos</h2>
+      <ul>
+        <li>No cambia la BIOS: solo recomienda y exporta el preset.</li>
+        <li>Sin CPU-Z, la lectura de SPD es la que expone el firmware por SMBIOS; en algunos portátiles viene incompleta (sin part number o sin velocidad nominal).</li>
+        <li>El die se identifica por part number: si el módulo no declara un part number reconocible, se usa el respaldo genérico y se avisa.</li>
+        <li>«Funciona en cualquier equipo» significa que no depende de datos fijados de una máquina concreta. Probado en HP ProDesk 400 G6 (i7-10700, 2×8 GB Hynix DJR, DDR4) y en el equipo de diseño (Ryzen 5800X, kit mixto 48 GB). Otras plataformas se calculan con la tabla del motor, pero no se han validado una a una en hardware real.</li>
+        <li>El benchmark <code>bench\membench.exe</code> es de Windows (C#); en macOS/Linux no está disponible y el doctor lo indica.</li>
+      </ul>
+      <div class="note">
+        <span class="em">📌</span>
+        <div>Este manual acompaña a <code>RAMRecommender.exe</code> y <code>RAMRecommender-cli.exe</code> de la misma carpeta. Versión del manual: <b>3.3</b>.</div>
+      </div>
+    </section>
+
+    <footer style="text-align:center;color:var(--muted);font-size:13px;padding:10px 0">
+      RAM Recommender v3.3 · manual en modo oscuro · 2026-11-23
+    </footer>
+
+  </main>
+</div>
+
+<script>
+  // Botones "Copiar" de cada bloque de código
+  document.querySelectorAll('.codeblock').forEach(function(b){
+    var btn = b.querySelector('.copy');
+    var pre = b.querySelector('pre');
+    if(!btn || !pre) return;
+    btn.addEventListener('click', function(){
+      var txt = pre.innerText;
+      var done = function(){ btn.textContent = '¡Copiado!'; setTimeout(function(){ btn.textContent='Copiar'; }, 1400); };
+      if(navigator.clipboard && navigator.clipboard.writeText){
+        navigator.clipboard.writeText(txt).then(done, function(){ fallback(); });
+      } else { fallback(); }
+      function fallback(){
+        var ta = document.createElement('textarea');
+        ta.value = txt; document.body.appendChild(ta); ta.select();
+        try{ document.execCommand('copy'); }catch(e){}
+        document.body.removeChild(ta); done();
+      }
+    });
+  });
+
+  // Resaltado del enlace activo en la barra lateral según el scroll
+  var links = Array.prototype.slice.call(document.querySelectorAll('#sidenav a'));
+  var secs = links.map(function(a){ return document.querySelector(a.getAttribute('href')); });
+  function onScroll(){
+    var y = window.scrollY + 120, idx = 0;
+    for(var i=0;i<secs.length;i++){ if(secs[i] && secs[i].offsetTop <= y) idx = i; }
+    links.forEach(function(a,i){ a.classList.toggle('active', i===idx); });
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+</script>
+</body>
+</html>
